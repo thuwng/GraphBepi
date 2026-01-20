@@ -42,12 +42,18 @@ def list_pdb_chains(pdb_root):
             continue
         if "_renum" in fn:
             continue
-        if "_" not in fn:
-            continue
 
         name = fn.replace(".pdb", "")
-        pdb, ch = name.split("_")
-        pairs.append((pdb.lower(), ch.upper()))
+        parts = name.split("_")
+
+        if len(parts) < 2:
+            continue
+
+        pdb = parts[0].lower()
+        ch = parts[1].upper()
+
+        pairs.append((pdb, ch))
+
     return sorted(pairs)
 
 
