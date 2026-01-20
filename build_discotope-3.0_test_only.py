@@ -62,7 +62,7 @@ def main(args):
 
     for pdb in tqdm(pdb_ids, desc="Building DiscoTope test set"):
         try:
-            chains = extract_chain(root, pdb, None, pdb_dir=args.pdb_dir)
+            chains = extract_chain(root, pdb, None)
         except Exception:
             continue
 
