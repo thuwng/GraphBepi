@@ -55,19 +55,17 @@ def main(args):
 
     esm_model = load_esm(args.esm_size, device)
 
-    pdb_ids = list_pdbs(args.pdb_dir)
-    print(f"[INFO] Found {len(pdb_ids)} PDBs")
+    pdb_ids = list_pdbs(os.path.join(root, "PDB"))
+    print(f"[INFO] Found {len(pdb_ids)} PDBs in root/PDB")
 
     test_samples = []
 
     for pdb in tqdm(pdb_ids, desc="Building DiscoTope test set"):
-        ch = "A"  # DiscoTope-3.0 test: mỗi file = 1 chain
+        ch = "A"
 
-        try:
-            ok = extract_chain(root, pdb, ch)
-            if not ok:
-                continue
-        except Exception:
+        ok = extract_chain(root, pdb, ch)
+        if not ok:
+            print(f"[WARN] extract_chain failed: {pdb}_{ch}")
             continue
 
         name = f"{pdb}_{ch}"
