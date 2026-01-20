@@ -34,12 +34,20 @@ def load_esm(esm_size, device):
     return model
 
 
-def list_pdbs(pdb_root):
-    out = []
+def list_pdb_chains(pdb_root):
+    pairs = []
     for fn in os.listdir(pdb_root):
-        if fn.endswith(".pdb"):
-            out.append(fn.replace(".pdb", "").lower())
-    return sorted(out)
+        if not fn.endswith(".pdb"):
+            continue
+        if "_renum" in fn:
+            continue
+        if "_" not in fn:
+            continue
+
+        name = fn.replace(".pdb", "")
+        pdb, ch = name.split("_")
+        pairs.append((pdb.lower(), ch.upper()))
+    return sorted(pairs)
 
 
 def main(args):
@@ -55,14 +63,12 @@ def main(args):
 
     esm_model = load_esm(args.esm_size, device)
 
-    pdb_ids = list_pdbs(os.path.join(root, "PDB"))
-    print(f"[INFO] Found {len(pdb_ids)} PDBs in root/PDB")
+    pdb_chains = list_pdb_chains(os.path.join(root, "PDB"))
+    print(f"[INFO] Found {len(pdb_chains)} PDB-chain pairs")
 
     test_samples = []
 
-    for pdb in tqdm(pdb_ids, desc="Building DiscoTope test set"):
-        ch = "A"
-
+    for pdb, ch in tqdm(pdb_chains, desc="Building DiscoTope test set"):
         ok = extract_chain(root, pdb, ch)
         if not ok:
             print(f"[WARN] extract_chain failed: {pdb}_{ch}")
