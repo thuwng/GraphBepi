@@ -2,6 +2,7 @@ import os
 import pickle as pk
 import traceback
 from tqdm import tqdm
+import argparse
 
 import torch
 import esm
@@ -95,3 +96,17 @@ def main(args):
 
     print(f"[DONE] test.pkl written: {out_path}")
     print(f"[INFO] Total chains: {len(test_samples)}")
+
+
+# =========================
+# ENTRY POINT (BẮT BUỘC)
+# =========================
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=str, required=True)
+    parser.add_argument("--gpu", type=int, default=-1)
+    parser.add_argument("--esm_size", type=str, default="650M")
+    parser.add_argument("--cache", type=str, default=None)
+
+    args = parser.parse_args()
+    main(args)
