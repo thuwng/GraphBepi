@@ -109,7 +109,11 @@ class chain:
     def extract(self,model,device,path):
         if len(self)>1024 or model is None:
             return
-        f=lambda x:model(x.to(device).unsqueeze(0),[36])['representations'][36].squeeze(0).cpu()
+        layer = model.num_layers
+        f = lambda x: model(
+            x.to(device).unsqueeze(0),
+            repr_layers=[layer]
+        )["representations"][layer].squeeze(0).cpu()
         with torch.no_grad():
             feat=f(self.amino)
         torch.save(feat,f'{path}/feat/{self.name}_esm2.ts')
