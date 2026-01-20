@@ -61,28 +61,29 @@ def main(args):
     test_samples = []
 
     for pdb in tqdm(pdb_ids, desc="Building DiscoTope test set"):
+        ch = "A"  # DiscoTope-3.0 test: mỗi file = 1 chain
+
         try:
-            chains = extract_chain(root, pdb, None)
+            ok = extract_chain(root, pdb, ch)
+            if not ok:
+                continue
         except Exception:
             continue
 
-        for ch in chains:
-            name = f"{pdb}_{ch}"
-            obj = chain()
-            obj.protein_name = pdb
-            obj.chain_name = ch
-            obj.name = name
+        name = f"{pdb}_{ch}"
+        obj = chain()
+        obj.protein_name = pdb
+        obj.chain_name = ch
+        obj.name = name
 
-            try:
-                process_chain(obj, root, obj.name, esm_model, device)
-            except Exception:
-                traceback.print_exc()
-                continue
+        try:
+            process_chain(obj, root, obj.name, esm_model, device)
+        except Exception:
+            traceback.print_exc()
+            continue
 
-            # Dummy label (all zeros)
-            obj.label = torch.zeros(obj.length, dtype=torch.long)
-
-            test_samples.append(obj)
+        obj.label = torch.zeros(obj.length, dtype=torch.long)
+        test_samples.append(obj)
 
     out_path = os.path.join(root, "test.pkl")
     with open(out_path, "wb") as f:
@@ -90,17 +91,3 @@ def main(args):
 
     print(f"[DONE] test.pkl written: {out_path}")
     print(f"[INFO] Total chains: {len(test_samples)}")
-
-
-if __name__ == "__main__":
-    import argparse
-
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--pdb_dir", required=True)
-    ap.add_argument("--root", required=True)
-    ap.add_argument("--gpu", type=int, default=0)
-    ap.add_argument("--esm_size", default="650M", choices=["150M", "650M", "3B"])
-    ap.add_argument("--cache", default="/kaggle/working/graphbepi_cache")
-    args = ap.parse_args()
-
-    main(args)
